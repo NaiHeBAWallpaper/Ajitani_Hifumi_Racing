@@ -49,7 +49,8 @@ const subtitleLocales = {
 	Chinese: 'zh-Hans',
 	TraditionalChinese: 'zh-Hant',
 	Japanese: 'ja',
-	Korean: 'ko'
+	Korean: 'ko',
+	Thai: 'th'
 };
 let isVoicelinePlaying = false;
 
@@ -86,7 +87,8 @@ const AUDIO_DETAIL = [
                 "하아~ 전차가 차가워서 기분 좋아…….",
                 "그림자에서 정말 멋지고 시원합니다.",
                 "탱크로 만든 비밀 기지를 어떻게 생각하세요?"
-            ]
+            ],
+            Thai: ["ฮ่า~ รถถังเย็นสบายจัง...","อยู่ในร่มแล้วเย็นสบายจริง ๆ ด้วยนะคะ...","คุณครูคิดยังไงกับฐานลับที่ทำจากรถถังคะ?"]
         }
     },
     {
@@ -115,7 +117,8 @@ const AUDIO_DETAIL = [
                 "너무 조용해요?",
                 "엔진이 꺼지면 갑옷은 주변 소리를 흡수합니다.",
                 "숨을 쉬고 심장 박동도 들을 수 있을 정도로 조용합니다."
-            ]
+            ],
+            Thai: ["...เงียบมากเลยใช่ไหมคะ","พอดับเครื่องยนต์แล้ว เกราะจะช่วยซับเสียงรอบข้างค่ะ","เงียบจนได้ยินแม้แต่เสียงหายใจกับเสียงหัวใจเต้นเลย..."]
         }
     },
     {
@@ -144,7 +147,8 @@ const AUDIO_DETAIL = [
                 "이 공간을 사랑해요",
                 "이 세상에 우리 둘뿐인 것처럼 느껴지네요",
                 "나 같은 평범한 학생과 함께 있으면 재미있지 않을 수도 있지만..."
-            ]
+            ],
+            Thai: ["ฉันชอบที่ตรงนี้มากเลยค่ะ","รู้สึกเหมือนเหลือเราสองคนอยู่บนโลกนี้—","อะ อาฮะฮะ! ถึงอยู่กับนักเรียนธรรมดาอย่างฉันอาจจะไม่ค่อยสนุกก็เถอะค่ะ..."]
         }
     },
     {
@@ -173,7 +177,8 @@ const AUDIO_DETAIL = [
                 "아, 예, 음, 음...",
                 "아하... 난 항상 당신으로부터 많은 에너지를 받는 것 같아요.",
                 "어, 어라? 왠지 더워지기 시작했네요! 페, 페인트가 빨리 마르면 좋겠는데……!"
-            ]
+            ],
+            Thai: ["เอ๊ะ? อ๊ะ มะ ไม่สิ เอ่อ คือว่า...!","อาฮะฮะ... ฉันเป็นฝ่ายได้กำลังใจจากคุณครูอยู่เรื่อยเลยนะคะ","อะ เอ๊ะ? จู่ ๆ ก็เริ่มร้อนขึ้นมาแล้วนะคะ! ขะ ขอให้สีแห้งไว ๆ ทีเถอะ...!"]
         }
     },
     {
@@ -202,7 +207,8 @@ const AUDIO_DETAIL = [
                 "(W-내 심장 박동의 소리가... 밖으로 유출되고 선생님가 들으면 어떨까?)",
                 "(음악을 연주하거나 엔진을 작동시켜야 했다...!)",
                 "(으으…… 부끄러워…….)"
-            ]
+            ],
+            Thai: ["(ถะ ถ้าคุณครูได้ยินเสียงหัวใจฉันเต้นขึ้นมา... จะทำยังไงดี)","(รู้งี้เปิดเพลงหรือสตาร์ตเครื่องทิ้งไว้ก็ดี...!)","(อือ... อายจัง...)"]
         }
     }
 ];
@@ -328,7 +334,7 @@ function playVoiceline() {
 			track.play().catch(finish);
 
 			if (dialogBox) {
-				textbox.textContent = dialog[window.selectedLanguage][index];
+				textbox.textContent = getSubtitleText(dialog, window.selectedLanguage, index);
 				textbox.style.opacity = 1;
 			}
 		},
@@ -508,6 +514,16 @@ function setMouse(event) {
 	return { x: ax - canvas.width * positionX, y: ay - canvas.height * positionY };
 }
 
+function getSubtitleText(dialog, language, index) {
+	let text = dialog?.[language]?.[index];
+	if (text == null && language === 'Thai') {
+		language = 'English';
+		text = dialog?.[language]?.[index];
+	}
+	textbox.lang = subtitleLocales[language];
+	return text ?? "";
+}
+
 function updateSubtitleLanguage() {
 	let language = subtitleLanguagePreference;
 	if (language === 'auto') {
@@ -521,6 +537,8 @@ function updateSubtitleLanguage() {
 			language = 'Japanese';
 		} else if (primary === 'ko' || primary === 'korean' || primary === 'koreana') {
 			language = 'Korean';
+		} else if (primary === 'th' || primary === 'thai') {
+			language = 'Thai';
 		} else {
 			language = 'English';
 		}
@@ -530,7 +548,7 @@ function updateSubtitleLanguage() {
 	window.selectedLanguage = language;
 	textbox.lang = subtitleLocales[language];
 	const clip = currentTracks.at(-1);
-	if (dialogBox && clip) textbox.textContent = clip.dialog[language][clip.index];
+	if (dialogBox && clip) textbox.textContent = getSubtitleText(clip.dialog, language, clip.index);
 }
 
 function init() {
